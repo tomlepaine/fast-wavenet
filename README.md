@@ -8,7 +8,7 @@ Our implementation speeds up Wavenet generation by eliminating redundant convolu
 
 While other Wavenet repos focus on training on a large corpus of data and generating samples, ours mostly describes an efficient generation algorithm (which is super simple), and provides an example implementation.
 
-We note that while not explicitly stated in the Wavenet paper, we talked to the authors, and they are already doing something similar.
+We note that while not explicitly stated in the Wavenet paper, we talked to the authors, and they are doing something similar.
 
 For more about Wavenet, see DeepMind's [blog post](https://deepmind.com/blog/wavenet-generative-model-raw-audio/).
 
