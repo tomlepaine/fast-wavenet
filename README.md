@@ -14,7 +14,7 @@ For more about Wavenet, see DeepMind's [blog post](https://deepmind.com/blog/wav
 
 ## Authors (helped via pair coding)
 - Tom Le Paine
-- Pooya Khorrami
+- [Pooya Khorrami](https://github.com/pkhorrami4)
 - Prajit Ramachandran
 - Shiyu Chang
 
