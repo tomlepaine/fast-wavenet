@@ -13,7 +13,7 @@ We note that while not explicitly stated in the Wavenet paper, we talked to the 
 For more about Wavenet, see DeepMind's [blog post](https://deepmind.com/blog/wavenet-generative-model-raw-audio/).
 
 ## Authors (helped via pair coding)
-- Tom Le Paine
+- [Tom Le Paine](https://github.com/tomlepaine)
 - [Pooya Khorrami](https://github.com/pkhorrami4)
 - Prajit Ramachandran
 - Shiyu Chang
