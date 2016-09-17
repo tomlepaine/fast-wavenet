@@ -19,7 +19,7 @@ For more about Wavenet, see DeepMind's [blog post](https://deepmind.com/blog/wav
 - Shiyu Chang
 
 ## Acknowledgements (helped via conversation)
-- Wei Han
+- [Wei](https://github.com/weihan3)
 - Yang Zhang
 - Yuchen Fan
 
