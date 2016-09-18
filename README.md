@@ -16,7 +16,7 @@ For more about Wavenet, see DeepMind's [blog post](https://deepmind.com/blog/wav
 - [Tom Le Paine](https://github.com/tomlepaine)
 - [Pooya Khorrami](https://github.com/pkhorrami4)
 - [Prajit Ramachandran](https://github.com/PrajitR)
-- [Shiyu Chang]（https://github.com/code-terminator）
+- [Shiyu Chang](https://github.com/code-terminator)
 
 ## Acknowledgements (helped via conversation)
 - [Wei](https://github.com/weihan3)
