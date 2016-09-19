@@ -72,7 +72,7 @@ class Generator(object):
         inputs = tf.placeholder(tf.float32, [batch_size, input_size],
                                 name='inputs')
 
-        print 'Make Generator.'
+        print('Make Generator.')
 
         count = 0
         h = inputs
