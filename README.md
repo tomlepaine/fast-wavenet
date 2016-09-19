@@ -12,6 +12,18 @@ We note that while not explicitly stated in the Wavenet paper, we talked to the 
 
 For more about Wavenet, see DeepMind's [blog post](https://deepmind.com/blog/wavenet-generative-model-raw-audio/).
 
+
+## Timing experiments
+
+<p align="center">
+    <img src="assets/timing-experiments.png" height="300">
+</p>
+
+We generated from a model with 2 blocks of L layers each, using a naive implementation and ours. Results are averaged over 100 repeats. When L is small the naive implementation performs better than expected due to GPU parallelization of the convolution operations. But when L is large, the efficient implementation really shines.
+
+## General purpose
+While this algorithm works well for auto-regressive models like Wavenet, it would be useful anytime you need to run a causal dilated convolutional neural network fast. For instance: classification/regression on streaming data.
+
 ## Authors (helped via pair coding)
 - [Tom Le Paine](https://github.com/tomlepaine)
 - [Pooya Khorrami](https://github.com/pkhorrami4)
@@ -22,9 +34,6 @@ For more about Wavenet, see DeepMind's [blog post](https://deepmind.com/blog/wav
 - [Wei](https://github.com/weihan3)
 - Yang Zhang
 - Yuchen Fan
-
-## General purpose
-While this algorithm works well for auto-regressive models like Wavenet, it would be useful anytime you need to run a causal dilated convolutional neural network fast. For instance: classification/regression on streaming data.
 
 ---
 
