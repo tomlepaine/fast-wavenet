@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-from layers import (Queue, _causal_linear, _output_linear, conv1d,
+from layers import (_causal_linear, _output_linear, conv1d,
                     dilated_conv1d)
 
 
