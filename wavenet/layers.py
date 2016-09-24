@@ -14,23 +14,20 @@ def time_to_batch(inputs, rate):
       outputs: (tensor)
       pad_left: (int)
     '''
-    batch_size = tf.shape(inputs)[0]
-    width = tf.shape(inputs)[1]
-    _, _, channels = inputs.get_shape().as_list()
+    _, width, num_channels = inputs.get_shape().as_list()
 
-    # Also add rate to width to make convolutional causal.
-    width_pad = tf.to_int32(rate * (tf.ceil(tf.to_float(width) / rate) + 1))
+    width_pad = int(rate * np.ceil((width + rate) * 1.0 / rate))
     pad_left = width_pad - width
 
-    zeros = tf.zeros(shape=(batch_size, pad_left, channels))
-    padded = tf.concat(1, (zeros, inputs))
-    padded_reshape = tf.reshape(padded, (batch_size * tf.to_int32((width_pad / rate)), rate,
-                                         channels))
-    outputs = tf.transpose(padded_reshape, perm=(1, 0, 2))
-    return outputs, pad_left - rate
+    perm = (1, 0, 2)
+    shape = (width_pad / rate, -1, num_channels) # missing dim: batch_size * rate
+    padded = tf.pad(inputs, [[0, 0], [pad_left, 0], [0, 0]])
+    transposed = tf.transpose(padded, perm)
+    reshaped = tf.reshape(transposed, shape)
+    outputs = tf.transpose(reshaped, perm)
+    return outputs
 
-
-def batch_to_time(inputs, crop_left, rate):
+def batch_to_time(inputs, rate, crop_left=0):
     ''' Reshape to 1d signal, and remove excess zero-padding.
     
     Used to perform 1D dilated convolution.
@@ -42,17 +39,20 @@ def batch_to_time(inputs, crop_left, rate):
     Ouputs:
       outputs: (tensor)
     '''
-    batch_size = tf.to_int32(tf.shape(inputs)[0] / rate)
-    width = tf.shape(inputs)[1]
-    _, _, channels = inputs.get_shape().as_list()
+    shape = tf.shape(inputs)
+    batch_size = shape[0] / rate
+    width = shape[1]
+    
     out_width = tf.to_int32(width * rate)
-
-    inputs_transposed = tf.transpose(inputs, perm=(1, 0, 2))
-    inputs_reshaped = tf.reshape(inputs_transposed,
-                                 (batch_size, out_width, tf.to_int32(channels)))
-    outputs = tf.slice(inputs_reshaped, [0, crop_left, 0], [-1, -1, -1])
-    return outputs
-
+    _, _, num_channels = inputs.get_shape().as_list()
+    
+    perm = (1, 0, 2)
+    new_shape = (out_width, -1, num_channels) # missing dim: batch_size
+    transposed = tf.transpose(inputs, perm)    
+    reshaped = tf.reshape(transposed, new_shape)
+    outputs = tf.transpose(reshaped, perm)
+    cropped = tf.slice(outputs, [0, crop_left, 0], [-1, -1, -1])
+    return cropped
 
 def conv1d(inputs,
            out_channels,
@@ -109,7 +109,6 @@ def conv1d(inputs,
 
     return outputs
 
-
 def dilated_conv1d(inputs,
                    out_channels,
                    filter_width=2,
@@ -135,22 +134,26 @@ def dilated_conv1d(inputs,
     '''
     assert name
     with tf.variable_scope(name):
-        inputs_, pad_left = time_to_batch(inputs, rate=rate)
+        _, width, _ = inputs.get_shape().as_list()
+        inputs_ = time_to_batch(inputs, rate=rate)
         outputs_ = conv1d(inputs_,
                           out_channels=out_channels,
                           filter_width=filter_width,
                           padding=padding,
                           gain=gain,
                           activation=activation)
-
-        outputs = batch_to_time(outputs_, pad_left, rate=rate)
+        _, conv_out_width, _ = outputs_.get_shape().as_list()
+        new_width = conv_out_width * rate
+        diff = new_width - width
+        outputs = batch_to_time(outputs_, rate=rate, crop_left=diff)
 
         # Add additional shape information.
-        outputs.set_shape(tf.TensorShape([tf.Dimension(None), tf.Dimension(
-            None), tf.Dimension(out_channels)]))
+        tensor_shape = [tf.Dimension(None),
+                        tf.Dimension(width),
+                        tf.Dimension(out_channels)]
+        outputs.set_shape(tf.TensorShape(tensor_shape))
 
     return outputs
-
 
 def _causal_linear(inputs, state, name=None, activation=None):
     assert name
@@ -166,7 +169,6 @@ def _causal_linear(inputs, state, name=None, activation=None):
         if activation:
             output = activation(output)
     return output
-
 
 def _output_linear(h, name=''):
     with tf.variable_scope(name, reuse=True):
