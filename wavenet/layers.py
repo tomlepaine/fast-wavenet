@@ -177,33 +177,3 @@ def _output_linear(h, name=''):
 
         output = tf.matmul(h, w) + tf.expand_dims(b, 0)
     return output
-
-
-class Queue(object):
-    def __init__(self, batch_size, state_size, buffer_size, name=None):
-        assert name
-        self.batch_size = batch_size
-        self.state_size = state_size
-        self.buffer_size = buffer_size
-
-        with tf.variable_scope(name):
-            self.state_buffer = tf.get_variable(
-                'state_buffer',
-                dtype=tf.float32,
-                shape=[buffer_size, batch_size, state_size],
-                initializer=tf.constant_initializer(0.0))
-
-            self.pointer = tf.get_variable('pointer',
-                                           initializer=tf.constant(0))
-
-    def pop(self):
-        state = tf.slice(self.state_buffer, [self.pointer, 0, 0],
-                         [1, -1, -1])[0, :, :]
-        return state
-
-    def push(self, item):
-        update_op = tf.scatter_update(self.state_buffer, self.pointer, item)
-        with tf.control_dependencies([update_op]):
-            push_op = tf.assign(self.pointer, tf.mod(self.pointer + 1,
-                                                     self.buffer_size))
-        return push_op
