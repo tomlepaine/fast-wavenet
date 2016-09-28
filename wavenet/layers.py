@@ -40,7 +40,7 @@ def batch_to_time(inputs, rate, crop_left=0):
       outputs: (tensor)
     '''
     shape = tf.shape(inputs)
-    batch_size = shape[0] / rate
+    batch_size = shape[0] // rate
     width = shape[1]
     
     out_width = tf.to_int32(width * rate)
