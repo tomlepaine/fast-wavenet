@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-from layers import (_causal_linear, _output_linear, conv1d,
-                    dilated_conv1d)
+from wavenet.layers import (_causal_linear, _output_linear, conv1d,
+                            dilated_conv1d)
 
 
 class Model(object):

@@ -114,7 +114,6 @@ def dilated_conv1d(inputs,
                    filter_width=2,
                    rate=1,
                    padding='VALID',
-                   name=None,
                    gain=np.sqrt(2),
                    activation=tf.nn.relu):
     '''
@@ -132,27 +131,24 @@ def dilated_conv1d(inputs,
     Outputs:
       outputs: (tensor)
     '''
-    assert name
-    with tf.variable_scope(name):
-        _, width, _ = inputs.get_shape().as_list()
-        inputs_ = time_to_batch(inputs, rate=rate)
-        outputs_ = conv1d(inputs_,
-                          out_channels=out_channels,
-                          filter_width=filter_width,
-                          padding=padding,
-                          gain=gain,
-                          activation=activation)
-        _, conv_out_width, _ = outputs_.get_shape().as_list()
-        new_width = conv_out_width * rate
-        diff = new_width - width
-        outputs = batch_to_time(outputs_, rate=rate, crop_left=diff)
+    _, width, _ = inputs.get_shape().as_list()
+    inputs_ = time_to_batch(inputs, rate=rate)
+    outputs_ = conv1d(inputs_,
+                      out_channels=out_channels,
+                      filter_width=filter_width,
+                      padding=padding,
+                      gain=gain,
+                      activation=activation)
+    _, conv_out_width, _ = outputs_.get_shape().as_list()
+    new_width = conv_out_width * rate
+    diff = new_width - width
+    outputs = batch_to_time(outputs_, rate=rate, crop_left=diff)
 
-        # Add additional shape information.
-        tensor_shape = [tf.Dimension(None),
-                        tf.Dimension(width),
-                        tf.Dimension(out_channels)]
-        outputs.set_shape(tf.TensorShape(tensor_shape))
-
+    # Add additional shape information.
+    tensor_shape = [tf.Dimension(None),
+                    tf.Dimension(width),
+                    tf.Dimension(out_channels)]
+    outputs.set_shape(tf.TensorShape(tensor_shape))
     return outputs
 
 def _causal_linear(inputs, state, name=None, activation=None):
