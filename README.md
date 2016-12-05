@@ -41,7 +41,7 @@ While this algorithm works well for auto-regressive models like Wavenet, it woul
 - [Shiyu Chang](https://github.com/code-terminator)
 
 ## Acknowledgements (helped via conversation)
-- [Wei](https://github.com/weihan3)
+- [Wei Han](https://github.com/weihan3)
 - Yang Zhang
 - Yuchen Fan
 
