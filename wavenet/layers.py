@@ -20,7 +20,7 @@ def time_to_batch(inputs, rate):
     pad_left = width_pad - width
 
     perm = (1, 0, 2)
-    shape = (width_pad / rate, -1, num_channels) # missing dim: batch_size * rate
+    shape = (width_pad // rate, -1, num_channels) # missing dim: batch_size * rate
     padded = tf.pad(inputs, [[0, 0], [pad_left, 0], [0, 0]])
     transposed = tf.transpose(padded, perm)
     reshaped = tf.reshape(transposed, shape)
@@ -40,7 +40,7 @@ def batch_to_time(inputs, rate, crop_left=0):
       outputs: (tensor)
     '''
     shape = tf.shape(inputs)
-    batch_size = shape[0] / rate
+    batch_size = shape[0] // rate
     width = shape[1]
     
     out_width = tf.to_int32(width * rate)
