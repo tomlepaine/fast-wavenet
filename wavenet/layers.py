@@ -4,11 +4,11 @@ import tensorflow as tf
 
 def time_to_batch(inputs, rate):
     '''If necessary zero-pads inputs and reshape by rate.
-    
+
     Used to perform 1D dilated convolution.
-    
+
     Args:
-      inputs: (tensor) 
+      inputs: (tensor)
       rate: (int)
     Outputs:
       outputs: (tensor)
@@ -27,32 +27,33 @@ def time_to_batch(inputs, rate):
     outputs = tf.transpose(reshaped, perm)
     return outputs
 
+
 def batch_to_time(inputs, rate, crop_left=0):
     ''' Reshape to 1d signal, and remove excess zero-padding.
-    
+
     Used to perform 1D dilated convolution.
-    
+
     Args:
       inputs: (tensor)
-      crop_left: (int)
       rate: (int)
+      crop_left: (int, default 0)
     Ouputs:
       outputs: (tensor)
     '''
     shape = tf.shape(inputs)
-    batch_size = shape[0] / rate
     width = shape[1]
-    
+
     out_width = tf.to_int32(width * rate)
     _, _, num_channels = inputs.get_shape().as_list()
-    
+
     perm = (1, 0, 2)
-    new_shape = (out_width, -1, num_channels) # missing dim: batch_size
-    transposed = tf.transpose(inputs, perm)    
+    new_shape = (out_width, -1, num_channels)  # missing dim: batch_size
+    transposed = tf.transpose(inputs, perm)
     reshaped = tf.reshape(transposed, new_shape)
     outputs = tf.transpose(reshaped, perm)
     cropped = tf.slice(outputs, [0, crop_left, 0], [-1, -1, -1])
     return cropped
+
 
 def conv1d(inputs,
            out_channels,
@@ -64,9 +65,9 @@ def conv1d(inputs,
            activation=tf.nn.relu,
            bias=False):
     '''One dimension convolution helper function.
-    
+
     Sets variables with good defaults.
-    
+
     Args:
       inputs:
       out_channels:
@@ -77,7 +78,7 @@ def conv1d(inputs,
       gain:
       activation:
       bias:
-      
+
     Outputs:
       outputs:
     '''
@@ -109,6 +110,7 @@ def conv1d(inputs,
 
     return outputs
 
+
 def dilated_conv1d(inputs,
                    out_channels,
                    filter_width=2,
@@ -118,7 +120,7 @@ def dilated_conv1d(inputs,
                    gain=np.sqrt(2),
                    activation=tf.nn.relu):
     '''
-    
+
     Args:
       inputs: (tensor)
       output_channels:
@@ -155,11 +157,13 @@ def dilated_conv1d(inputs,
 
     return outputs
 
+
 def _causal_linear(inputs, state, name=None, activation=None):
     assert name
     '''
+
     '''
-    with tf.variable_scope(name, reuse=True) as scope:
+    with tf.variable_scope(name, reuse=True):
         w = tf.get_variable('w')
         w_r = w[0, :, :]
         w_e = w[1, :, :]
@@ -169,6 +173,7 @@ def _causal_linear(inputs, state, name=None, activation=None):
         if activation:
             output = activation(output)
     return output
+
 
 def _output_linear(h, name=''):
     with tf.variable_scope(name, reuse=True):

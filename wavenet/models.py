@@ -14,7 +14,7 @@ class Model(object):
                  num_layers=14,
                  num_hidden=128,
                  gpu_fraction=1.0):
-        
+
         self.num_time_samples = num_time_samples
         self.num_channels = num_channels
         self.num_classes = num_classes
@@ -22,7 +22,7 @@ class Model(object):
         self.num_layers = num_layers
         self.num_hidden = num_hidden
         self.gpu_fraction = gpu_fraction
-        
+
         inputs = tf.placeholder(tf.float32,
                                 shape=(None, num_time_samples, num_channels))
         targets = tf.placeholder(tf.int32, shape=(None, num_time_samples))
@@ -36,12 +36,13 @@ class Model(object):
                 h = dilated_conv1d(h, num_hidden, rate=rate, name=name)
                 hs.append(h)
 
-        outputs = conv1d(h,
-                         num_classes,
-                         filter_width=1,
-                         gain=1.0,
-                         activation=None,
-                         bias=True)
+        with tf.variable_scope('output'):
+            outputs = conv1d(h,
+                             num_classes,
+                             filter_width=1,
+                             gain=1.0,
+                             activation=None,
+                             bias=True)
 
         costs = tf.nn.sparse_softmax_cross_entropy_with_logits(
             outputs, targets)
@@ -49,8 +50,7 @@ class Model(object):
 
         train_step = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
-        gpu_options = tf.GPUOptions(
-            per_process_gpu_memory_fraction=gpu_fraction)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_fraction)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
         sess.run(tf.initialize_all_variables())
 
@@ -70,14 +70,14 @@ class Model(object):
             feed_dict=feed_dict)
         return cost
 
-    def train(self, inputs, targets):
+    def train(self, inputs, targets, min_cost=1e-1, max_iter=2e2):
         losses = []
         terminal = False
         i = 0
         while not terminal:
             i += 1
             cost = self._train(inputs, targets)
-            if cost < 1e-1:
+            if cost < min_cost or i > max_iter:
                 terminal = True
             losses.append(cost)
             if i % 50 == 0:
@@ -108,7 +108,7 @@ class Generator(object):
                     state_size = 1
                 else:
                     state_size = self.model.num_hidden
-                    
+
                 q = tf.FIFOQueue(rate,
                                  dtypes=tf.float32,
                                  shapes=(batch_size, state_size))
@@ -122,7 +122,7 @@ class Generator(object):
                 h = _causal_linear(h, state_, name=name, activation=tf.nn.relu)
                 count += 1
 
-        outputs = _output_linear(h)
+        outputs = _output_linear(h, name='output')
 
         out_ops = [tf.nn.softmax(outputs)]
         out_ops.extend(push_ops)
@@ -130,7 +130,7 @@ class Generator(object):
         self.inputs = inputs
         self.init_ops = init_ops
         self.out_ops = out_ops
-        
+
         # Initialize queues.
         self.model.sess.run(self.init_ops)
 
@@ -139,7 +139,7 @@ class Generator(object):
         for step in range(num_samples):
 
             feed_dict = {self.inputs: input}
-            output = self.model.sess.run(self.out_ops, feed_dict=feed_dict)[0] # ignore push ops
+            output = self.model.sess.run(self.out_ops, feed_dict=feed_dict)[0]  # ignore push ops
             value = np.argmax(output[0, :])
 
             input = np.array(self.bins[value])[None, None]
